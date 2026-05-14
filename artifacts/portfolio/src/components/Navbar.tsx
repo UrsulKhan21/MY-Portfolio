@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const links = ['About', 'Skills', 'Projects', 'Experience', 'Contact'];
+const resumeUrl = 'https://drive.google.com/file/d/1BB4Vu4cb2yrZ4sC5aNShsJEMc5foiqGX/view';
 
 export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
@@ -44,7 +45,7 @@ export default function Navbar() {
               <span className="absolute -bottom-0.5 left-0 w-0 h-px bg-gradient-to-r from-purple-500 to-cyan-500 group-hover:w-full transition-all duration-300" />
             </button>
           ))}
-          <a href="/resume.pdf" download className="btn-primary text-sm py-2 px-4">
+          <a href={resumeUrl} target="_blank" rel="noopener noreferrer" className="btn-primary text-sm py-2 px-4">
             Resume
           </a>
         </div>

@@ -42,20 +42,23 @@ const socials = [
 export default function Contact() {
   return (
     <section id="contact" className="section-padding">
-      <div className="content-shell-medium">
+      <div className="content-shell-medium" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.7 }}
-          className="text-center mb-16"
+          className="text-center mb-16 w-full"
         >
           <span className="text-cyan-400 text-sm font-medium tracking-widest uppercase">Get In Touch</span>
           <h2 className="font-display font-bold text-4xl md:text-5xl text-white mt-3 mb-4">
             Let's <span className="gradient-text">Connect</span>
           </h2>
-          <div className="w-16 h-0.5 mx-auto" style={{ background: 'linear-gradient(90deg, #8B5CF6, #06B6D4)' }} />
-          <p className="text-slate-400 mt-6 max-w-md mx-auto text-sm">
+          <div
+            className="w-16 h-0.5"
+            style={{ marginInline: 'auto', background: 'linear-gradient(90deg, #8B5CF6, #06B6D4)' }}
+          />
+          <p className="text-slate-400 mt-6 text-sm" style={{ maxWidth: '28rem', marginInline: 'auto' }}>
             Open to full-time roles, collaborations, and research projects in AI/ML.
           </p>
         </motion.div>
@@ -65,9 +68,10 @@ export default function Contact() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.7 }}
-          className="max-w-3xl mx-auto"
+          className="w-full"
+          style={{ maxWidth: '64rem', marginInline: 'auto' }}
         >
-          <div className="grid sm:grid-cols-3 gap-4 mb-8">
+          <div className="mb-8 flex flex-wrap justify-center gap-4">
             {socials.map(s => (
               <motion.a
                 key={s.name}
@@ -75,7 +79,11 @@ export default function Contact() {
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex flex-col items-center gap-3 p-5 rounded-2xl text-center transition-all group"
-                style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)' }}
+                style={{
+                  width: 'min(100%, 19.25rem)',
+                  background: 'rgba(255,255,255,0.03)',
+                  border: '1px solid rgba(255,255,255,0.07)',
+                }}
                 whileHover={{ y: -6, boxShadow: `0 0 25px ${s.glow}`, borderColor: `${s.color}30` }}
               >
                 <div className="w-12 h-12 rounded-xl flex items-center justify-center" style={{ background: `${s.color}15`, color: s.color }}>
@@ -90,10 +98,15 @@ export default function Contact() {
           </div>
 
           <div
-            className="rounded-2xl p-5"
-            style={{ background: 'rgba(139,92,246,0.08)', border: '1px solid rgba(139,92,246,0.2)' }}
+            className="rounded-2xl p-5 text-center"
+            style={{
+              maxWidth: '52rem',
+              marginInline: 'auto',
+              background: 'rgba(139,92,246,0.08)',
+              border: '1px solid rgba(139,92,246,0.2)',
+            }}
           >
-            <div className="flex items-center gap-2 mb-2">
+            <div className="flex items-center justify-center gap-2 mb-2">
               <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
               <span className="text-green-400 text-sm font-medium">Available for opportunities</span>
             </div>

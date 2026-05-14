@@ -10,6 +10,8 @@ class QueryResponse(BaseModel):
     answer: str
     sources: list[str]
     num_contexts: int
+    sentiment: str = "neutral"
+    intent: str = "general"
 
 
 class IngestTextRequest(BaseModel):

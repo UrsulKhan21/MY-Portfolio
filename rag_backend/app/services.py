@@ -179,9 +179,13 @@ class RAGService:
     def __init__(self, settings: Settings):
         self.settings = settings
         self._embedding_service: EmbeddingService | None = None
-        self.client = OpenAI(
-            api_key=settings.groq_api_key,
-            base_url="https://api.groq.com/openai/v1",
+        self.client = (
+            OpenAI(
+                api_key=settings.groq_api_key,
+                base_url="https://api.groq.com/openai/v1",
+            )
+            if settings.groq_api_key
+            else None
         )
 
     @property
@@ -191,14 +195,21 @@ class RAGService:
         return self._embedding_service
 
     def query(self, question: str, top_k: int = 3) -> dict[str, object]:
-        if not self.settings.groq_api_key:
-            raise RuntimeError("GROQ_API_KEY is required to generate answers.")
+        understanding = self.understand_question(question)
 
         direct_answer = self.answer_direct_question(question)
         if direct_answer:
-            return {"answer": direct_answer, "sources": [], "num_contexts": 0}
+            return {
+                "answer": direct_answer,
+                "sources": [],
+                "num_contexts": 0,
+                **understanding,
+            }
 
-        search_results = self.embedding_service.search(question, top_k=top_k)
+        search_results = self.embedding_service.search(
+            self.retrieval_query(question, understanding),
+            top_k=top_k,
+        )
         contexts = search_results["contexts"]
         sources = search_results["sources"]
 
@@ -210,6 +221,15 @@ class RAGService:
                 ),
                 "sources": [],
                 "num_contexts": 0,
+                **understanding,
+            }
+
+        if not self.settings.groq_api_key:
+            return {
+                "answer": self.answer_from_context(question, contexts, understanding),
+                "sources": sources,
+                "num_contexts": len(contexts),
+                **understanding,
             }
 
         context_block = "\n\n".join(contexts)
@@ -224,12 +244,17 @@ class RAGService:
                         "Answer only using the provided context for facts about Abdur. "
                         "If a personal detail is not in the context, say that it is not in Abdur's current portfolio knowledge yet. "
                         "Read the user's tone with care, be warm and emotionally natural, and avoid blunt one-line refusals. "
+                        "Use the detected sentiment to adjust tone without changing facts. "
                         "Keep answers concise, friendly, and specific."
                     ),
                 },
                 {
                     "role": "user",
-                    "content": f"Context:\n{context_block}\n\nQuestion: {question}",
+                    "content": (
+                        f"Detected intent: {understanding['intent']}\n"
+                        f"Detected sentiment: {understanding['sentiment']}\n\n"
+                        f"Context:\n{context_block}\n\nQuestion: {question}"
+                    ),
                 },
             ],
             temperature=0.2,
@@ -237,7 +262,133 @@ class RAGService:
         )
 
         answer = completion.choices[0].message.content.strip()
-        return {"answer": answer, "sources": sources, "num_contexts": len(contexts)}
+        return {
+            "answer": answer,
+            "sources": sources,
+            "num_contexts": len(contexts),
+            **understanding,
+        }
+
+    def understand_question(self, question: str) -> dict[str, str]:
+        normalized = re.sub(r"[^a-z0-9\s]", " ", question.lower())
+        normalized = re.sub(r"\s+", " ", normalized).strip()
+
+        negative_terms = {
+            "bad",
+            "wrong",
+            "error",
+            "angry",
+            "annoyed",
+            "frustrated",
+            "hate",
+            "not good",
+            "don t know",
+            "don't know",
+            "confused",
+            "problem",
+        }
+        positive_terms = {
+            "good",
+            "great",
+            "nice",
+            "love",
+            "thanks",
+            "thank",
+            "awesome",
+            "perfect",
+        }
+
+        sentiment = "neutral"
+        if any(term in normalized for term in negative_terms):
+            sentiment = "frustrated"
+        elif any(term in normalized for term in positive_terms):
+            sentiment = "positive"
+
+        intent = "general"
+        intent_patterns = [
+            ("private_personal", r"\b(religion|religious|religius|muslim|hindu|christian|faith|belief|beliefs|beliefe)\b"),
+            ("profile", r"\b(about\s+(you|yourself|abdur)|tell\s+me\s+about\s+(you|yourself|abdur)|introduce|what\s+(do\s+)?you\s+do|what\s+can\s+you\s+do)\b"),
+            ("skills", r"\b(skill|skills|stack|tech|technology|tools|framework|frameworks|use|uses|know)\b"),
+            ("projects", r"\b(project|projects|built|work|portfolio|rag|llm|stock|sentiment|nlp)\b"),
+            ("education", r"\b(cgpa|education|btech|b tech|degree|college|graduate|graduation)\b"),
+            ("experience", r"\b(experience|internship|intern|anwimac|job)\b"),
+            ("contact", r"\b(email|contact|reach|mail)\b"),
+            ("location", r"\b(location|based|live|from|city|udaipur|rajasthan)\b"),
+            ("opportunities", r"\b(open|available|opportunity|opportunities|role|roles|hire|hiring|collaboration|collaborate)\b"),
+        ]
+        for label, pattern in intent_patterns:
+            if re.search(pattern, normalized):
+                intent = label
+                break
+
+        return {"intent": intent, "sentiment": sentiment}
+
+    def retrieval_query(self, question: str, understanding: dict[str, str]) -> str:
+        intent_expansions = {
+            "private_personal": "religious beliefs personal faith private spiritual views not included portfolio knowledge",
+            "profile": "Abdur Ursul Khan B.Tech Computer Science Artificial Intelligence graduate projects skills portfolio background",
+            "skills": "skills technology stack tools frameworks programming languages AI ML full stack",
+            "projects": "projects RAG LLM fine tuning stock market analytics NLP full stack applications",
+            "education": "education B.Tech Computer Science Artificial Intelligence Aravali Institute CGPA",
+            "experience": "internship work experience ANWIMAC web development",
+            "contact": "email contact reach",
+            "location": "based location city Udaipur Rajasthan",
+            "opportunities": "open full-time roles collaborations research projects AI engineering machine learning full stack",
+        }
+        expansion = intent_expansions.get(understanding["intent"], "")
+        return f"{question}\n{expansion}".strip()
+
+    def answer_from_context(
+        self,
+        question: str,
+        contexts: list[str],
+        understanding: dict[str, str],
+    ) -> str:
+        context = "\n".join(contexts)
+        normalized_question = re.sub(r"[^a-z0-9\s]", " ", question.lower())
+        normalized_question = re.sub(r"\s+", " ", normalized_question).strip()
+
+        if understanding["sentiment"] == "frustrated":
+            prefix = "You're right to expect the portfolio chat to answer from its knowledge base. "
+        else:
+            prefix = ""
+
+        if understanding["intent"] == "private_personal":
+            return (
+                prefix
+                + "Abdur's religious beliefs, personal faith, and private spiritual views are not included in the current portfolio knowledge base. "
+                "I can answer about his education, skills, projects, experience, location, or contact information."
+            )
+
+        sentences = re.split(r"(?<=[.!?])\s+", context.strip())
+        question_terms = {
+            term
+            for term in normalized_question.split()
+            if len(term) > 2 and term not in {"what", "tell", "about", "your", "you", "are", "the", "kind"}
+        }
+
+        ranked_sentences: list[tuple[int, str]] = []
+        for sentence in sentences:
+            normalized_sentence = re.sub(r"[^a-z0-9\s]", " ", sentence.lower())
+            score = sum(1 for term in question_terms if term in normalized_sentence)
+            if understanding["intent"] != "general" and understanding["intent"] in normalized_sentence:
+                score += 2
+            ranked_sentences.append((score, sentence.strip()))
+
+        ranked_sentences.sort(key=lambda item: item[0], reverse=True)
+        selected = [sentence for score, sentence in ranked_sentences[:3] if sentence and score > 0]
+
+        if not selected:
+            selected = [sentence.strip() for sentence in sentences[:2] if sentence.strip()]
+
+        if not selected:
+            return (
+                prefix
+                + "I don't have that detail in Abdur's current portfolio knowledge yet. "
+                "I can still help with his skills, projects, education, experience, location, and contact information."
+            )
+
+        return prefix + " ".join(selected)
 
     def answer_direct_question(self, question: str) -> str | None:
         normalized = re.sub(r"[^a-z0-9\s]", " ", question.lower())
@@ -251,30 +402,6 @@ class RAGService:
 
         if re.search(r"\b(who\s+are\s+you|what\s+are\s+you)\b", normalized):
             return "I'm Abdur's portfolio assistant, built to answer questions about his portfolio and background."
-
-        knowledge_text = self.local_knowledge_text()
-
-        if re.search(r"\b(about\s+(yourself|abdur)|tell\s+me\s+about\s+(yourself|abdur)|introduce)\b", normalized):
-            return (
-                "Abdur Ursul Khan is a B.Tech Computer Science and Artificial Intelligence graduate from Aravali Institute "
-                "with an 8.5 CGPA. He builds AI and full-stack projects, including RAG pipelines, LLM fine-tuning work, "
-                "stock market analytics, NLP sentiment analysis, and production-focused web applications."
-            )
-
-        if "chess" in normalized and "chess" in knowledge_text.lower():
-            return "Yes. Abdur plays chess and enjoys strategy-focused games."
-
-        if re.search(r"\b(cgpa|education|btech|b tech|degree|college)\b", normalized):
-            if "8.5" in knowledge_text and "b.tech" in knowledge_text.lower():
-                return "Abdur has passed out with a B.Tech in Computer Science and Artificial Intelligence from Aravali Institute with an 8.5 CGPA."
-
-        if re.search(r"\b(project|projects|built|work)\b", normalized):
-            if "retrieval-augmented generation" in knowledge_text.lower():
-                return "Abdur has built RAG pipelines, LLM fine-tuning work, stock market analytics, NLP sentiment analysis, and full-stack web applications."
-
-        if re.search(r"\b(skill|skills|tech stack|technologies|know)\b", normalized):
-            if "javascript" in knowledge_text.lower():
-                return "Abdur works with Python, JavaScript, LangChain, TensorFlow, Qdrant, Docker, React, Next.js, Tailwind CSS, Framer Motion, Django, FastAPI, and AI deployment workflows."
 
         return None
 

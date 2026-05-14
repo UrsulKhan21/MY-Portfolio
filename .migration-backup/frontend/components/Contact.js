@@ -1,4 +1,3 @@
-
 import { motion } from 'framer-motion';
 import { useState } from 'react';
 
@@ -37,8 +36,8 @@ const Contact = () => {
   };
 
   return (
-    <section className="py-20 bg-gray-900 text-white">
-      <div className="container mx-auto px-4">
+    <section className="py-20 bg-gray-900 text-white flex items-center justify-center min-h-screen">
+      <div className="container mx-auto px-4 flex flex-col items-center justify-center">
         <motion.div
           initial={{ opacity: 0, y: 50 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -46,51 +45,63 @@ const Contact = () => {
           className="text-center mb-12"
         >
           <h2 className="text-4xl font-bold">Contact Me</h2>
-          <p className="text-lg text-gray-400 mt-2">Get in touch, let's work together</p>
+          <p className="text-lg text-gray-400 mt-2">
+            Get in touch, let's work together
+          </p>
         </motion.div>
+
         <motion.form
           initial={{ opacity: 0, y: 50 }}
           whileInView={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.3 }}
           onSubmit={handleSubmit}
-          className="max-w-xl mx-auto"
+          className="max-w-xl w-full mx-auto"
         >
-          <div className="mb-4">
-            <label htmlFor="name" className="block text-lg mb-2">Name</label>
+          <div className="mb-4 text-center">
+            <label htmlFor="name" className="block text-lg mb-2">
+              Name
+            </label>
             <input
               type="text"
               name="name"
               id="name"
               value={formData.name}
               onChange={handleChange}
-              className="w-full px-4 py-2 rounded-lg bg-gray-800 text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
+              className="w-full px-4 py-2 rounded-lg bg-gray-800 text-white text-center focus:outline-none focus:ring-2 focus:ring-purple-500"
               required
             />
           </div>
-          <div className="mb-4">
-            <label htmlFor="email" className="block text-lg mb-2">Email</label>
+
+          <div className="mb-4 text-center">
+            <label htmlFor="email" className="block text-lg mb-2">
+              Email
+            </label>
             <input
               type="email"
               name="email"
               id="email"
               value={formData.email}
               onChange={handleChange}
-              className="w-full px-4 py-2 rounded-lg bg-gray-800 text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
+              className="w-full px-4 py-2 rounded-lg bg-gray-800 text-white text-center focus:outline-none focus:ring-2 focus:ring-purple-500"
               required
             />
           </div>
-          <div className="mb-4">
-            <label htmlFor="message" className="block text-lg mb-2">Message</label>
+
+          <div className="mb-4 text-center">
+            <label htmlFor="message" className="block text-lg mb-2">
+              Message
+            </label>
             <textarea
               name="message"
               id="message"
               rows="5"
               value={formData.message}
               onChange={handleChange}
-              className="w-full px-4 py-2 rounded-lg bg-gray-800 text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
+              className="w-full px-4 py-2 rounded-lg bg-gray-800 text-white text-center focus:outline-none focus:ring-2 focus:ring-purple-500"
               required
             ></textarea>
           </div>
+
           <motion.button
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
@@ -99,6 +110,7 @@ const Contact = () => {
           >
             Send Message
           </motion.button>
+
           {status && <p className="text-center mt-4">{status}</p>}
         </motion.form>
       </div>

@@ -49,7 +49,8 @@ export default function RagChatbot() {
         ...current,
         {
           role: 'assistant',
-          content: 'I could not reach the RAG backend right now. Please check the backend URL and environment variables.',
+          content:
+            "I don't have that detail in Abdur's current portfolio knowledge yet. I can still help with his skills, projects, education, experience, location, and contact information.",
         },
       ]);
     } finally {
@@ -70,7 +71,7 @@ export default function RagChatbot() {
               </div>
               <div>
                 <div className="font-display text-sm font-semibold text-white">Ask About Abdur</div>
-                <div className="text-xs text-slate-500">RAG powered portfolio chat</div>
+                <div className="text-xs text-slate-500">Portfolio knowledge chat</div>
               </div>
             </div>
             <button
