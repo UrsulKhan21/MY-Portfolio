@@ -1,0 +1,15 @@
+Abdur Ursul Khan has passed out with a B.Tech in Computer Science and Artificial Intelligence from Aravali Institute with an 8.5 CGPA.
+
+Abdur is interested in AI engineering, machine learning research, full stack development, RAG systems, and production-grade LLM applications.
+
+Abdur has built projects involving Retrieval-Augmented Generation pipelines, LLM fine-tuning, stock market analytics, NLP sentiment analysis, and full-stack web applications.
+
+Abdur has experience with Python, JavaScript, LangChain, TensorFlow, Qdrant, Docker, React, Next.js, Tailwind CSS, Framer Motion, Django, FastAPI, and modern AI deployment workflows.
+
+Abdur completed a 45-day internship at ANWIMAC Technologies in web development.
+
+Abdur is based in Udaipur, Rajasthan. His email is abdurursulkhan@gmail.com.
+
+Abdur is open to full-time roles, collaborations, research projects, AI engineering roles, machine learning roles, and full stack development opportunities.
+
+Abdur plays chess and enjoys strategy-focused games.

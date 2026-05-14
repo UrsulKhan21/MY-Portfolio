@@ -1,0 +1,20 @@
+FROM node:20-alpine
+
+WORKDIR /app
+
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
+COPY artifacts/api-server/package.json artifacts/api-server/tsconfig.json artifacts/api-server/build.mjs ./artifacts/api-server/
+COPY artifacts/api-server/src ./artifacts/api-server/src
+COPY lib/api-zod/package.json lib/api-zod/src ./lib/api-zod/
+COPY lib/db/package.json lib/db/src ./lib/db/
+COPY lib/db/drizzle.config.ts ./lib/db/
+
+RUN corepack enable && corepack prepare pnpm@10.33.0 --activate
+RUN pnpm install --frozen-lockfile
+
+WORKDIR /app/artifacts/api-server
+RUN pnpm run build
+
+EXPOSE 8080
+ENV PORT=8080
+CMD ["pnpm", "run", "start"]

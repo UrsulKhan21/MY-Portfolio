@@ -1,0 +1,11 @@
+node_modules
+**/node_modules
+.pnpm-store
+**/__pycache__
+*.pyc
+rag_backend/.venv
+dist
+artifacts/portfolio/dist
+.artifacts
+.vscode
+*.log
