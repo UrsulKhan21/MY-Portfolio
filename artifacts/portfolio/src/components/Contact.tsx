@@ -1,7 +1,4 @@
 import { motion } from 'framer-motion';
-import { useState } from 'react';
-
-const apiBaseUrl = import.meta.env.VITE_API_BASE_URL?.replace(/\/$/, '') ?? '';
 
 const socials = [
   {
@@ -43,29 +40,6 @@ const socials = [
 ];
 
 export default function Contact() {
-  const [formData, setFormData] = useState({ name: '', email: '', message: '' });
-  const [status, setStatus] = useState<'idle' | 'sending' | 'sent' | 'error'>('idle');
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setStatus('sending');
-    try {
-      const res = await fetch(`${apiBaseUrl ? `${apiBaseUrl}/api/messages` : '/api/messages'}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
-      });
-      if (res.ok) {
-        setStatus('sent');
-        setFormData({ name: '', email: '', message: '' });
-      } else {
-        setStatus('error');
-      }
-    } catch {
-      setStatus('error');
-    }
-  };
-
   return (
     <section id="contact" className="section-padding">
       <div className="content-shell-medium">
@@ -82,139 +56,52 @@ export default function Contact() {
           </h2>
           <div className="w-16 h-0.5 mx-auto" style={{ background: 'linear-gradient(90deg, #8B5CF6, #06B6D4)' }} />
           <p className="text-slate-400 mt-6 max-w-md mx-auto text-sm">
-            Open to full-time roles, collaborations, and research projects in AI/ML. Let's build something extraordinary.
+            Open to full-time roles, collaborations, and research projects in AI/ML.
           </p>
         </motion.div>
 
-        <div className="grid lg:grid-cols-2 gap-10">
-          {/* Left — Socials */}
-          <motion.div
-            initial={{ opacity: 0, x: -30 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.7 }}
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.7 }}
+          className="max-w-3xl mx-auto"
+        >
+          <div className="grid sm:grid-cols-3 gap-4 mb-8">
+            {socials.map(s => (
+              <motion.a
+                key={s.name}
+                href={s.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex flex-col items-center gap-3 p-5 rounded-2xl text-center transition-all group"
+                style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)' }}
+                whileHover={{ y: -6, boxShadow: `0 0 25px ${s.glow}`, borderColor: `${s.color}30` }}
+              >
+                <div className="w-12 h-12 rounded-xl flex items-center justify-center" style={{ background: `${s.color}15`, color: s.color }}>
+                  {s.icon}
+                </div>
+                <div>
+                  <div className="font-semibold text-white text-sm">{s.name}</div>
+                  <div className="text-slate-400 text-xs mt-1 break-all">{s.handle}</div>
+                </div>
+              </motion.a>
+            ))}
+          </div>
+
+          <div
+            className="rounded-2xl p-5"
+            style={{ background: 'rgba(139,92,246,0.08)', border: '1px solid rgba(139,92,246,0.2)' }}
           >
-            <h3 className="font-display font-semibold text-white text-xl mb-6">Connect with me</h3>
-            <div className="space-y-4 mb-8">
-              {socials.map(s => (
-                <motion.a
-                  key={s.name}
-                  href={s.href}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center gap-4 p-4 rounded-2xl transition-all group"
-                  style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)' }}
-                  whileHover={{ x: 6, boxShadow: `0 0 25px ${s.glow}`, borderColor: `${s.color}30` }}
-                >
-                  <div className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0"
-                    style={{ background: `${s.color}15`, color: s.color }}>
-                    {s.icon}
-                  </div>
-                  <div>
-                    <div className="font-semibold text-white text-sm">{s.name}</div>
-                    <div className="text-slate-400 text-xs mt-0.5">{s.handle}</div>
-                  </div>
-                  <div className="ml-auto text-slate-600 group-hover:text-slate-300 transition-colors">
-                    <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" />
-                    </svg>
-                  </div>
-                </motion.a>
-              ))}
+            <div className="flex items-center gap-2 mb-2">
+              <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
+              <span className="text-green-400 text-sm font-medium">Available for opportunities</span>
             </div>
-
-            {/* Availability card */}
-            <div className="rounded-2xl p-5"
-              style={{ background: 'rgba(139,92,246,0.08)', border: '1px solid rgba(139,92,246,0.2)' }}>
-              <div className="flex items-center gap-2 mb-2">
-                <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
-                <span className="text-green-400 text-sm font-medium">Available for opportunities</span>
-              </div>
-              <p className="text-slate-400 text-sm">
-                Looking for AI Engineering, ML Research, or Full Stack roles. Ready to relocate or work remotely.
-              </p>
-            </div>
-          </motion.div>
-
-          {/* Right — Form */}
-          <motion.div
-            initial={{ opacity: 0, x: 30 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.7 }}
-          >
-            <div className="rounded-2xl p-7"
-              style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)', backdropFilter: 'blur(20px)' }}>
-              <h3 className="font-display font-semibold text-white text-xl mb-6">Send a message</h3>
-
-              {status === 'sent' ? (
-                <motion.div
-                  initial={{ opacity: 0, scale: 0.9 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  className="text-center py-12"
-                >
-                  <div className="text-5xl mb-4">✅</div>
-                  <h4 className="font-display font-bold text-white text-xl mb-2">Message sent!</h4>
-                  <p className="text-slate-400">I'll get back to you soon.</p>
-                  <button onClick={() => setStatus('idle')} className="btn-secondary mt-6 text-sm">Send another</button>
-                </motion.div>
-              ) : (
-                <form onSubmit={handleSubmit} className="space-y-4">
-                  {[
-                    { id: 'name', label: 'Name', type: 'text', placeholder: 'Your name' },
-                    { id: 'email', label: 'Email', type: 'email', placeholder: 'your@email.com' },
-                  ].map(f => (
-                    <div key={f.id}>
-                      <label className="block text-slate-400 text-sm mb-1.5">{f.label}</label>
-                      <input
-                        type={f.type}
-                        value={formData[f.id as 'name' | 'email']}
-                        onChange={e => setFormData({ ...formData, [f.id]: e.target.value })}
-                        placeholder={f.placeholder}
-                        required
-                        className="w-full px-4 py-3 rounded-xl text-sm text-white placeholder-slate-600 outline-none transition-all"
-                        style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)' }}
-                        onFocus={e => (e.target.style.borderColor = 'rgba(139,92,246,0.5)')}
-                        onBlur={e => (e.target.style.borderColor = 'rgba(255,255,255,0.08)')}
-                      />
-                    </div>
-                  ))}
-                  <div>
-                    <label className="block text-slate-400 text-sm mb-1.5">Message</label>
-                    <textarea
-                      rows={4}
-                      value={formData.message}
-                      onChange={e => setFormData({ ...formData, message: e.target.value })}
-                      placeholder="Tell me about the opportunity or project..."
-                      required
-                      className="w-full px-4 py-3 rounded-xl text-sm text-white placeholder-slate-600 outline-none transition-all resize-none"
-                      style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)' }}
-                      onFocus={e => (e.target.style.borderColor = 'rgba(139,92,246,0.5)')}
-                      onBlur={e => (e.target.style.borderColor = 'rgba(255,255,255,0.08)')}
-                    />
-                  </div>
-                  {status === 'error' && (
-                    <p className="text-red-400 text-sm">Something went wrong. Try emailing directly.</p>
-                  )}
-                  <button
-                    type="submit"
-                    disabled={status === 'sending'}
-                    className="btn-primary w-full justify-center py-3"
-                  >
-                    {status === 'sending' ? (
-                      <>
-                        <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                        Sending...
-                      </>
-                    ) : (
-                      <>Send Message <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" /></svg></>
-                    )}
-                  </button>
-                </form>
-              )}
-            </div>
-          </motion.div>
-        </div>
+            <p className="text-slate-400 text-sm">
+              Looking for AI Engineering, ML Research, or Full Stack roles. Ready to relocate or work remotely.
+            </p>
+          </div>
+        </motion.div>
       </div>
     </section>
   );

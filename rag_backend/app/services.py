@@ -254,6 +254,13 @@ class RAGService:
 
         knowledge_text = self.local_knowledge_text()
 
+        if re.search(r"\b(about\s+(yourself|abdur)|tell\s+me\s+about\s+(yourself|abdur)|introduce)\b", normalized):
+            return (
+                "Abdur Ursul Khan is a B.Tech Computer Science and Artificial Intelligence graduate from Aravali Institute "
+                "with an 8.5 CGPA. He builds AI and full-stack projects, including RAG pipelines, LLM fine-tuning work, "
+                "stock market analytics, NLP sentiment analysis, and production-focused web applications."
+            )
+
         if "chess" in normalized and "chess" in knowledge_text.lower():
             return "Yes. Abdur plays chess and enjoys strategy-focused games."
 
