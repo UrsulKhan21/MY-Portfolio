@@ -111,7 +111,7 @@ export default function Hero() {
                 Contact Me
               </button>
               <a
-                href="https://drive.google.com/file/d/1hHNUP3prmOGn0aXJ9dSl3eGDSz-GYLH5/view"
+                href="https://drive.google.com/file/d/1BB4Vu4cb2yrZ4sC5aNShsJEMc5foiqGX/view"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="btn-cyan"

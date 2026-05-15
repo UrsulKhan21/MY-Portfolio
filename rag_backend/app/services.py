@@ -206,10 +206,23 @@ class RAGService:
                 **understanding,
             }
 
-        search_results = self.embedding_service.search(
-            self.retrieval_query(question, understanding),
-            top_k=top_k,
-        )
+        try:
+            search_results = self.embedding_service.search(
+                self.retrieval_query(question, understanding),
+                top_k=top_k,
+            )
+        except Exception as exc:
+            print("Qdrant search failed:", repr(exc))
+            return {
+                "answer": (
+                    "I could not connect to the Qdrant vector database right now. "
+                    "Please check the backend QDRANT_URL and QDRANT_API_KEY environment variables, then reindex the portfolio data."
+                ),
+                "sources": [],
+                "num_contexts": 0,
+                **understanding,
+            }
+
         contexts = search_results["contexts"]
         sources = search_results["sources"]
 
@@ -312,6 +325,8 @@ class RAGService:
             ("projects", r"\b(project|projects|built|work|portfolio|rag|llm|stock|sentiment|nlp)\b"),
             ("education", r"\b(cgpa|education|btech|b tech|degree|college|graduate|graduation)\b"),
             ("experience", r"\b(experience|internship|intern|anwimac|job)\b"),
+            ("games", r"\b(game|games|play|plays|chess|strategy)\b"),
+            ("political_social", r"\b(political|politics|social\s+views?|views?|inclusive|progressive|values?)\b"),
             ("contact", r"\b(email|contact|reach|mail)\b"),
             ("location", r"\b(location|based|live|from|city|udaipur|rajasthan)\b"),
             ("opportunities", r"\b(open|available|opportunity|opportunities|role|roles|hire|hiring|collaboration|collaborate)\b"),
@@ -325,16 +340,82 @@ class RAGService:
 
     def retrieval_query(self, question: str, understanding: dict[str, str]) -> str:
         intent_expansions = {
-            "private_personal": "religious beliefs personal faith private spiritual views not included portfolio knowledge",
-            "profile": "Abdur Ursul Khan B.Tech Computer Science Artificial Intelligence graduate projects skills portfolio background",
-            "skills": "skills technology stack tools frameworks programming languages AI ML full stack",
-            "projects": "projects RAG LLM fine tuning stock market analytics NLP full stack applications",
-            "education": "education B.Tech Computer Science Artificial Intelligence Aravali Institute CGPA",
-            "experience": "internship work experience ANWIMAC web development",
-            "contact": "email contact reach",
-            "location": "based location city Udaipur Rajasthan",
-            "opportunities": "open full-time roles collaborations research projects AI engineering machine learning full stack",
-        }
+    "private_personal": (
+        "religious beliefs personal faith private spiritual views balanced perspective "
+        "non extremist values personal philosophy family background life context"
+    ),
+
+    "profile": (
+        "Abdur Ursul Khan final year B.Tech Computer Science Artificial Intelligence "
+        "student AI engineer portfolio background resume introduction"
+    ),
+
+    "skills": (
+        "Python JavaScript Django React Next.js FastAPI TensorFlow PyTorch LangChain "
+        "LangGraph CrewAI Qdrant Docker Kubernetes AWS machine learning deep learning "
+        "NLP RAG vector database full stack development"
+    ),
+
+    "projects": (
+        "RAG systems Retrieval Augmented Generation LLM fine tuning chatbot stock market "
+        "analytics NLP sentiment analysis AI trading system full stack web applications "
+        "document querying transformers prompt engineering"
+    ),
+
+    "education": (
+        "B.Tech Computer Science Artificial Intelligence Aravali Institute RTU "
+        "8.3 CGPA academic background university education"
+    ),
+
+    "experience": (
+        "ANWIMAC Technologies internship web development backend frontend Django "
+        "JavaScript software development professional experience"
+    ),
+
+    "games": (
+        "chess national level west zone strategy games football cricket kho kho "
+        "sports hobbies competitive gaming"
+    ),
+
+    "political_social": (
+        "inclusive progressive constitutional values diversity anti extremism "
+        "social views political philosophy balanced opinions"
+    ),
+
+    "contact": (
+        "email contact reach connect collaboration networking professional communication "
+        "abdurursulkhan@gmail.com"
+    ),
+
+    "location": (
+        "Udaipur Rajasthan India based location city hometown"
+    ),
+
+    "opportunities": (
+        "open to full time roles internships collaborations research opportunities "
+        "AI engineering machine learning engineer full stack developer software engineer"
+    ),
+
+    "tech_stack": (
+        "React Next.js Django FastAPI MySQL Qdrant Docker Kubernetes AWS "
+        "TensorFlow PyTorch Hugging Face OpenAI API"
+    ),
+
+    "ai_focus": (
+        "Agentic AI autonomous systems LangGraph CrewAI transformers LLM applications "
+        "fine tuning retrieval systems generative AI"
+    ),
+
+    "soft_skills": (
+        "fast learner proactive problem solver teamwork leadership communication "
+        "English Hindi adaptability"
+    ),
+
+    "hobbies": (
+        "chess football cricket history documentaries Discovery Channel "
+        "strategy thinking athletics"
+    )
+}
         expansion = intent_expansions.get(understanding["intent"], "")
         return f"{question}\n{expansion}".strip()
 
